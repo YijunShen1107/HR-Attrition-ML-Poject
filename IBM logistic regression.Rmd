@@ -1,0 +1,46 @@
+---
+title: "IBM logistic regression"
+author: "Yijun Shen"
+date: "2022-08-11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r cars}
+ibm<-read.csv("IBM_Cleaned_data.csv")
+ibm
+```
+
+logistic regression:
+
+```{r pressure, echo=FALSE}
+summary(ibm)
+dim(ibm)
+
+
+library(ISLR)
+glm.fit = glm(Y_variable~DistanceFromHome+Education+EnvironmentSatisfaction+JobRole+JobSatisfaction + MonthlyIncome + MonthlyRate + NumCompaniesWorked + PercentSalaryHike + WorkLifeBalance + Gender1, data=ibm, family = binomial)
+
+summary(glm.fit)
+summary(glm.fit)$coef
+
+#prediction
+glm.probs=predict(glm.fit, type="response")# here type=response to tell R to output probabilities of the form P(Y = 1|X), basically when y = 1, possible x outcome. the probability that the market will go up given values of the predictors.
+
+glm.pred=rep("0",1470)#creates a vestor of all 1470 "0" elements
+glm.pred[glm.probs>0.5]="1" #teach R when to tranform "0" elements to "1" elements
+table(glm.pred, ibm$Y_variable)
+mean(glm.pred == ibm$Y_variable)
+#Training Accuracy: 0.8394558
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+
+```
+
