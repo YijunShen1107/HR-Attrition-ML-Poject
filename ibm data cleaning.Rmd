@@ -1,0 +1,55 @@
+---
+title: "data cleaning hirebeats"
+author: "Yijun Shen"
+date: '2022-07-26'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(readr)
+library(janitor)
+ibm<-read.csv("WA_Fn-UseC_-HR-Employee-Attrition.csv")
+na.omit(ibm)
+summary(ibm)
+```
+
+##remove variables
+
+```{r}
+ibm1 <- subset(ibm, select=-c(Age,BusinessTravel,DailyRate,Department,EducationField,	EmployeeCount,EmployeeNumber,HourlyRate,JobInvolvement,MaritalStatus,Over18,OverTime,PerformanceRating,	RelationshipSatisfaction,StandardHours,StockOptionLevel,TrainingTimesLastYear,YearsAtCompany,YearsSinceLastPromotion,YearsWithCurrManager))
+ibm1
+summary(ibm1)
+```
+#correlation check
+```{r}
+library(corrplot)
+numeric.var <- sapply(ibm1, is.numeric)#select only numeric variables
+corr.matrix <- cor(ibm1[,numeric.var])
+corrplot(corr.matrix, main = '\n\n Correlation plot for Numeric Variables',
+         method = "number")
+```
+
+#encoding
+```{r}
+ibm1$Y_variable <- ifelse(ibm1$Attrition=='Yes', 1, 0)
+ibm1$Gender1 <- ifelse(ibm1$Gender=='Male', 1, 0)
+ibm1 <- subset(ibm1, select=-c(Gender,Attrition,TotalWorkingYears,YearsInCurrentRole,JobLevel))
+```
+
+#SMOTE: randomly adding observations making it equal(binary Y)
+```{r}
+#https://www.statology.org/smote-in-r/
+install.packages(DMwR)
+library(DMwR)
+#use SMOTE to create new dataset that is more balanced
+new_df <- SMOTE(y ~ ., df, perc.over = 2000, perc.under = 400)
+
+write.csv(ibm1, file ="IBM_Cleaned_data.csv", row.names = FALSE)
+```
